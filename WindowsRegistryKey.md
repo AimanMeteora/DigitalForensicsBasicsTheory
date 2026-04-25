@@ -60,3 +60,162 @@ Registry backups are the opposite of Transaction logs. These are the backups of 
  directory every ten days. It might be an excellent place to look if you
  suspect that some registry keys might have been deleted/modified 
 recently.
+
+---
+
+## Registry Viewer:  
+As we can see in the screenshot below, AccessData's Registry Viewer  has
+ a similar user interface to the Windows Registry Editor. There are a 
+couple of limitations, though. It only loads one hive at a time, and it 
+can't take the transaction logs into account.
+
+---
+
+## Zimmerman's Registry Explorer:
+Eric Zimmerman has developed a handful of tools that are very useful for performing Digital Forensics and Incident Response. One of them is the Registry Explorer. It looks like the below screenshot. It can load multiple hives simultaneously and add data from transaction logs into the hive to make a more 'cleaner' hive with more up-to-date data. It also has a handy 'Bookmarks' option containing forensically important registry keys often sought by forensics investigators. Investigators can go straight to the interesting registry keys and values with the bookmarks menu item. We will explore these in more detail in the upcoming tasks.
+
+---
+
+## RegRipper:  
+RegRipper 
+ is a utility that takes a registry hive as input and outputs a report 
+that extracts data from some of the forensically important keys and 
+values in that hive. The output report is in a text file and shows all 
+the results in sequential order. 
+RegRipper is available in both a CLI and GUI form which is shown in the screenshot below.
+
+One shortcoming of RegRipper is that it does not take the transaction
+ logs into account. We must use Registry Explorer to merge transaction 
+logs with the respective registry hives before sending the output to 
+RegRipper for a more accurate result.
+Even though we have discussed these different tools, for the purpose 
+of this room, we will only be using Registry Explorer and some of Eric 
+Zimmerman's tools. The other tools mentioned here will be covered in 
+separate rooms.
+
+---
+
+## OS Version:
+If we only have triage data to perform forensics, we can determine the OS version from which this data was pulled through the registry. To find the OS version, we can use the following registry key:
+SOFTWARE\Microsoft\Windows NT\CurrentVersion
+
+## Current control set:
+The hives containing the machine’s configuration data used for 
+controlling system startup are called Control Sets. Commonly, we will 
+see two Control Sets, ControlSet001 and ControlSet002, in the SYSTEM 
+hive on a machine. In most cases (but not always), ControlSet001 will 
+point to the Control Set that the machine booted with, and ControlSet002
+ will be the last known good  configuration. Their locations will be:
+SYSTEM\ControlSet001
+SYSTEM\ControlSet002
+
+Windows creates a volatile Control Set when the machine is live, called the CurrentControlSet ( HKLM\SYSTEM\CurrentControlSet). For getting the most accurate system information, this is 
+the hive that we will refer to. We can find out which Control Set is 
+being used as the CurrentControlSet by looking at the following registry
+ value:
+SYSTEM\Select\Current
+
+## Computer Name:  
+It is crucial to establish the Computer Name while performing 
+forensic analysis to ensure that we are working on the machine we are 
+supposed to work on. We can find the Computer Name from the following 
+location:
+SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName
+
+
+## Time Zone Information:  
+For accuracy, it is important to establish what time zone the 
+computer is located in. This will help us understand the chronology of 
+the events as they happened. For finding the Time Zone Information, we 
+can look at the following location:
+SYSTEM\CurrentControlSet\Control\TimeZoneInformation
+
+## Network Interfaces and Past Networks:  
+The following registry key will give a list of network interfaces on the machine we are investigating:
+SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
+Each Interface is represented with a unique identifier (GUID) subkey, which contains values relating to the interface’s TCP/IP configuration. This key will provide us with information like IP addresses, DHCP IP address and Subnet Mask, DNS Servers, and more. This information is significant because it helps you make sure that you are performing forensics on the machine that you are supposed to perform it on.
+The past networks a given machine was connected to can be found in the following locations:
+SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged
+SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed
+These registry keys contain past networks as well as the last time they were connected. The last write time of the registry key points to the last time these networks were connected.
+
+## Autostart Programs (Autoruns):  
+The following registry keys include information about programs or commands that run when a user logs on. 
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce
+SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce
+SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Explorer\Run
+SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+
+The following registry key contains information about services:
+SYSTEM\CurrentControlSet\Services
+
+
+## SAM hive and user information:  
+The SAM hive contains user account information, login information, 
+and group information. This information is mainly located in the 
+following location:
+SAM\Domains\Account\Users
+
+The information contained here includes the relative identifier (RID) of the user, number of times the user logged in, last login time, last failed login, last password change, password expiry, password policy and password hint, and any groups that the user is a part of. 
+
+---
+
+## Recent Files:
+
+Windows maintains a list of recently opened files for each user. As 
+we might have seen when using Windows Explorer, it shows us a list of 
+recently used files.  This information is stored in the NTUSER hive and 
+can be found on the following location:
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs
+Registry Explorer allows us to sort data contained in registry keys 
+quickly. For example, the Recent documents tab arranges the Most 
+Recently Used (MRU) file at the top of the list. Registry Explorer also 
+arranges them so that the Most Recently Used (MRU) file is shown at the 
+top of the list and the older ones later.
+Another interesting piece of information in this registry key is that there are different keys with file extensions, such as  .pdf, .jpg, .docx etc. These keys provide us with information about the last 
+used files of a specific file extension. So if we are looking 
+specifically for the last used PDF files, we can look at the following 
+registry key:
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.pdf
+
+Similar to the Recent Docs maintained by Windows Explorer, Microsoft 
+Office also maintains a list of recently opened documents. This list is 
+also located in the NTUSER hive. It can be found in the following 
+location:
+NTUSER.DAT\Software\Microsoft\Office\VERSION
+
+The version number for each Microsoft Office release is different. An example registry key will look like this:
+NTUSER.DAT\Software\Microsoft\Office\15.0\Word
+Here, the 15.0 refers to Office 2013. A list of different Office releases and their version numbers can be found on this link .
+
+Starting from Office 365, Microsoft now ties the location to the user's live ID . In such a scenario, the recent files can be found at the following location. 
+NTUSER.DAT\Software\Microsoft\Office\VERSION\UserMRU\LiveID_####\FileMRU
+
+When any user opens a folder, it opens in a specific layout. Users 
+can change this layout according to their preferences. These layouts can
+ be different for different folders. This information about the Windows 'shell'  is
+ stored and can identify the Most Recently Used files and folders. Since
+ this setting is different for each user, it is located in the user 
+hives. We can find this information on the following locations:
+USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\Bags
+USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
+NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU
+NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags
+
+Registry Explorer doesn't give us much information about ShellBags. 
+However, another tool from Eric Zimmerman's tools called the ShellBag 
+Explorer shows us the information in an easy-to-use format. We just have
+ to point to the hive file we have extracted, and it parses the data and
+ shows us the results.
+
+
+Open/Save and LastVisited Dialog MRUs:
+
+When we open or save a file, a dialog box appears asking us where to 
+save or open that file from. It might be noticed that once we open/save a
+ file at a specific location, Windows remembers that location. This 
+implies that we can find out recently used files if we get our hands on 
+this information. We can do so by examining the following registry keys
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePIDlMRU
+NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU
