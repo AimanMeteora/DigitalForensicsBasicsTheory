@@ -1,2 +1,2 @@
-# MobileDeviceForensicsNotes
-Notes from mobile device forensics course (Android)
+# Digital Foreniscs Basics (Theory)
+Notes from Digital Forensics course (theory only)
