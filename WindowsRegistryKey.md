@@ -302,14 +302,10 @@ the device was removed from the system.
 SYSTEM\CurrentControlSet\Enum\USBSTOR\Ven_Prod_Version\USBSerial#\Properties\{83da6326-97a6-4088-9453-a19231573b29}\####
 
 In this key, the #### sign can be replaced by the following digits to get the required information:
-Value 
-Information 
-0064
-First Connection time
-0066
-Last Connection time
-0067
-Last removal time
+
+<img width="383" height="179" alt="image" src="https://github.com/user-attachments/assets/93d1d1b3-af3b-4cd0-a0e9-50fc3e004ee6" />
+
+
 Although we can check this value manually, as we have seen above, 
 Registry Explorer already parses this data and shows us if we select the
  USBSTOR key.
